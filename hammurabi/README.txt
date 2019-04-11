@@ -1,0 +1,1 @@
+Namespaces in this folder should represent country jurisdictions (with the exception of "intl" for international sources). Where appropriate, country abbreviations should follow the conventions used in internet domain names.

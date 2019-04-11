@@ -1,0 +1,1 @@
+This is the rule repository for the state of Georgia.

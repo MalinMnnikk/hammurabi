@@ -1,0 +1,1 @@
+This is the rule repository for law related to foreign relations, defense, and military and veterans affairs.
