@@ -16,18 +16,7 @@ The Hammurabi Project provides a vehicle for representing portions of the law in
 
 Hammurabi's purpose is to make law-related determinations - that is, to apply legal rules to a given factual situation and report the result. The repository is set up to accept law from any jurisdiction in the world, but with a practical focus on English-language legal materials and U.S. law specifically.
 
-Legal rules from U.S. primary sources can be found in:
-
-* U.S. Code
-* Code of Federal Regulations
-* Federal case law
-* Presidential Executive Orders
-* State statutes and regulations
-* State case law
-* International legal materials
-* IRS publications
-
-Rules from one of these sources tend to reference those of other sources.  Hammurabi weaves all of these sources together in a single, integrated knowledge base capable of deep legal analysis.
+U.S sources of legal rules include: the U.S. Code, Code of Federal Regulations, federal and state case law, state stautes and regulations, Executive Orders, and IRS publications, among other sources. Rules from one of these sources tend to reference those of other sources. Hammurabi weaves all of these sources together in a single, integrated knowledge base capable of deep legal analysis.
 
 ## Uses
 
