@@ -97,12 +97,6 @@ class TestDSL(unittest.TestCase):
     def test_internal_and_14(self):
         self.assertEqual(internal_and(False, Null).value, False)
 
-    # def test_internal_and_15(self):
-    #     self.assertEqual(internal_and2(False, Value(None), True).value, False)
-
-    # def test_internal_and_16(self):
-    #     self.assertEqual(internal_and2(False, "anything", True).value, False)
-
     def test_internal_and_17(self):
         self.assertEqual(internal_and(Stub, Value(True)).value, "Stub")
 
@@ -816,6 +810,9 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(Pretty(And(Stub, False)),
                          Pretty(Eternal(False)))
 
+    def test_ts_and_7(self):
+        self.assertEqual(Pretty(And(False, Null, True)), Pretty(Eternal(False)))
+
     # Time series OR
 
     def test_ts_or_1(self):
@@ -859,6 +856,14 @@ class TestDSL(unittest.TestCase):
     def test_ts_not_2(self):
         self.assertEqual(Pretty(Not(tsbool2)),
                          Pretty(TS({Dawn: False, '2023-01-01': True, '2024-01-01': Stub})))
+
+    def test_ts_not_3(self):
+        self.assertEqual(Pretty(Not(Eternal(True))),
+                         Pretty(Eternal(False)))
+
+    def test_ts_not_4(self):
+        self.assertEqual(Pretty(Not(True)),
+                         Pretty(Eternal(False)))
 
     # Time series addition
 
@@ -914,6 +919,26 @@ class TestDSL(unittest.TestCase):
                          Pretty(TS({Dawn: False,
                                     '2020-01-01': True})))
 
+    def test_ts_cmp_2(self):
+        self.assertEqual(Pretty(TS({Dawn: 4, '2020-01-01': 8}) >= 5),
+                         Pretty(TS({Dawn: False, '2020-01-01': True})))
+
+    def test_ts_cmp_3(self):
+        self.assertEqual(Pretty(TS({Dawn: 4, '2020-01-01': 8}) >= 3),
+                         Pretty(TS({Dawn: True})))
+
+    def test_ts_cmp_4(self):
+        self.assertEqual(Pretty(Eternal(3) >= 3),
+                         Pretty(Eternal(True)))
+
+    def test_ts_cmp_5(self):
+        self.assertEqual(Pretty(TS({Dawn: 4, '2020-01-01': 8}) != 3),
+                         Pretty(TS({Dawn: True})))
+
+    def test_ts_cmp_6(self):
+        self.assertEqual(Pretty(TS({Dawn: 4, '2020-01-01': 8}) != 4),
+                         Pretty(TS({Dawn: False, '2020-01-01': True})))
+
     # AddDays
 
     def test_adddays_1(self):
@@ -967,189 +992,320 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(Pretty(TimeSeries({1: Value(5)})), "5 (100% certain)")
 
 
-    # If
+    # if_for_values
 
     def test_if_1(self):
-        self.assertEqual(If(Null, 1, 2).value, "Null")
+        self.assertEqual(if_for_values(Null, 1, 2).value, "Null")
 
     def test_if_2(self):
-        self.assertEqual(If(Value(True), 1, 2).value, 1)
+        self.assertEqual(if_for_values(Value(True), 1, 2).value, 1)
 
     def test_if_3(self):
-        self.assertEqual(If(True, 1, 2).value, 1)
+        self.assertEqual(if_for_values(True, 1, 2).value, 1)
 
     def test_if_4(self):
-        self.assertEqual(If(Value(False), 1, 2).value, 2)
+        self.assertEqual(if_for_values(Value(False), 1, 2).value, 2)
 
     def test_if_5(self):
-        self.assertEqual(If(False, 1, 2).value, 2)
+        self.assertEqual(if_for_values(False, 1, 2).value, 2)
 
     def test_if_6(self):
-        self.assertEqual(If(Stub, 1, 2).value, "Stub")
+        self.assertEqual(if_for_values(Stub, 1, 2).value, "Stub")
 
     def test_if_7(self):
-        self.assertEqual(If(True, Stub, 2).value, "Stub")
+        self.assertEqual(if_for_values(True, Stub, 2).value, "Stub")
 
-    # If (CFs)
+    # if_for_values (CFs)
 
     def test_if_cf_1(self):
-        self.assertEqual(If(Value(True,.8), Value(1, .9),
-                            Value(True,.3), Value(1, .5),
-                            Value(True,.6), Value(1, .2)).cf, .8)
+        self.assertEqual(if_for_values(Value(True,.8), Value(1, .9),
+                                       Value(True,.3), Value(1, .5),
+                                       Value(True,.6), Value(1, .2)).cf, .8)
 
     def test_if_cf_2(self):
-        self.assertEqual(If(Value(True,.8), Value(1, .2),
-                            Value(True,.3), Value(1, .5),
-                            Value(True,.6), Value(1, .2)).cf, .2)
+        self.assertEqual(if_for_values(Value(True,.8), Value(1, .2),
+                                       Value(True,.3), Value(1, .5),
+                                       Value(True,.6), Value(1, .2)).cf, .2)
 
     def test_if_cf_3(self):
-        self.assertEqual(If(Value(False,.8), Value(1, .9),
-                            Value(True,.3), Value(1, .5),
-                            Value(True,.6), Value(1, .2)).cf, .3)
+        self.assertEqual(if_for_values(Value(False,.8), Value(1, .9),
+                                       Value(True,.3), Value(1, .5),
+                                       Value(True,.6), Value(1, .2)).cf, .3)
 
     def test_if_cf_4(self):
-        self.assertEqual(If(Value(False,.8), Value(1, .9),
-                            Value(True,.6), Value(1, .5),
-                            Value(True,.6), Value(1, .2)).cf, .5)
+        self.assertEqual(if_for_values(Value(False,.8), Value(1, .9),
+                                       Value(True,.6), Value(1, .5),
+                                       Value(True,.6), Value(1, .2)).cf, .5)
 
     def test_if_cf_5(self):
-        self.assertEqual(If(Value(False,.8), Value(1, .9),
-                            Value(False,.6), Value(1, .5),
-                            Value(True,.6), Value(1, .2)).cf, .2)
+        self.assertEqual(if_for_values(Value(False,.8), Value(1, .9),
+                                       Value(False,.6), Value(1, .5),
+                                       Value(True,.6), Value(1, .2)).cf, .2)
 
     def test_if_cf_6(self):
-        self.assertEqual(If(Value(False,.8), Value(1, .9),
-                            Value(False,.1), Value(1, .5),
-                            Value(True,.6), Value(1, .2)).cf, .1)
+        self.assertEqual(if_for_values(Value(False,.8), Value(1, .9),
+                                       Value(False,.1), Value(1, .5),
+                                       Value(True,.6), Value(1, .2)).cf, .1)
 
     def test_if_cf_7(self):
-        self.assertEqual(If(Value(False,.8), Value(1, .9),
-                            Value(False,.6), Value(1, .5),
-                            Value(True,.5), Value(1, .9)).cf, .5)
+        self.assertEqual(if_for_values(Value(False,.8), Value(1, .9),
+                                       Value(False,.6), Value(1, .5),
+                                       Value(True,.5), Value(1, .9)).cf, .5)
 
-    # # MAP
-    #
-    # def test_map_1(self):
-    #     self.assertEqual(Map(lambda x: x * 8, [3, 5, 8]).value, [24, 40, 64])
-    #
-    # def test_map_2(self):
-    #     self.assertEqual(Map(lambda x: x * 8, V([3, 5, 8])).value, [24, 40, 64])
-    #
-    # def test_map_3(self):
-    #     self.assertEqual(Map(lambda x: x * 8, V(None)).value, None)
-    #
-    # def test_map_4(self):
-    #     self.assertEqual(Map(lambda x: x * 8, Stub()).value, StubVal)
-    #
-    # def test_map_5(self):
-    #     self.assertEqual(Map(lambda x: x * 8, [3, V(None), 8]).value, None)
-    #
-    # def test_map_6(self):
-    #     self.assertEqual(Map(lambda x: x * 8, V([3, V(None), 8])).value, None)
-    #
-    # def test_map_7(self):
-    #     self.assertEqual(Map(lambda x: x * 8, Stub()).value, StubVal)
-    #
-    # # ANY
-    #
-    # def test_any_1(self):
-    #     self.assertEqual(Any([3, 5, 8]).value, False)
-    #
-    # def test_any_2(self):
-    #     self.assertEqual(Any(V([3, 5, 8])).value, False)
-    #
-    # def test_any_3(self):
-    #     self.assertEqual(Any(V([3, 5, True])).value, True)
-    #
-    # def test_any_4(self):
-    #     self.assertEqual(Any(V([3, 5, V(True)])).value, True)
-    #
-    # def test_any_5(self):
-    #     self.assertEqual(Any([3, 5, V(True)]).value, True)
-    #
-    # def test_any_6(self):
-    #     self.assertEqual(Any([3, 5, V(False)]).value, False)
-    #
-    # def test_any_7(self):
-    #     self.assertEqual(Any([3, 5, V(None)]).value, None)
-    #
-    # def test_any_8(self):
-    #     self.assertEqual(Any(V(None)).value, None)
-    #
-    # def test_any_9(self):
-    #     self.assertEqual(Any([3, 5, Stub()]).value, StubVal)
-    #
-    # def test_any_10(self):
-    #     self.assertEqual(Any(Stub()).value, StubVal)
-    #
-    # def test_any_11(self):
-    #     self.assertEqual(Any([3, True, Stub()]).value, True)
-    #
-    # def test_any_12(self):
-    #     self.assertEqual(Any([True, Stub()]).value, True)
-    #
-    # def test_any_13(self):
-    #     self.assertEqual(Any([V(True), Stub()]).value, True)
-    #
-    # def test_any_14(self):
-    #     self.assertEqual(Any([False, False, True]).value, True)
-    #
-    # # ALL
-    #
-    # def test_all_1(self):
-    #     self.assertEqual(All([3, 5, 8]).value, False)
-    #
-    # def test_all_2(self):
-    #     self.assertEqual(All(V([3, 5, 8])).value, False)
-    #
-    # def test_all_3(self):
-    #     self.assertEqual(All(V([3, 5, True])).value, False)
-    #
-    # def test_all_4(self):
-    #     self.assertEqual(All(V([3, 5, V(True)])).value, False)
-    #
-    # def test_all_5(self):
-    #     self.assertEqual(All([3, 5, V(True)]).value, False)
-    #
-    # def test_all_6(self):
-    #     self.assertEqual(All([3, 5, V(False)]).value, False)
-    #
-    # def test_all_7(self):
-    #     self.assertEqual(All([V(True), V(True), V(True)]).value, True)
-    #
-    # def test_all_8(self):
-    #     self.assertEqual(All([V(True), True, V(True)]).value, True)
-    #
-    # def test_all_9(self):
-    #     self.assertEqual(All([3, 5, Stub()]).value, StubVal)
-    #
-    # def test_all_10(self):
-    #     self.assertEqual(All(Stub()).value, StubVal)
-    #
-    # def test_all_11(self):
-    #     self.assertEqual(All([3, False, Stub()]).value, False)
-    #
-    # def test_all_12(self):
-    #     self.assertEqual(All([False, Stub()]).value, False)
-    #
-    # def test_all_13(self):
-    #     self.assertEqual(All([V(False), Stub()]).value, False)
-    #
-    # # EXISTS
-    #
-    # def test_exists_1(self):
-    #     self.assertEqual(Exists(lambda x: x > 6, V([3, 5, 8])).value, True)
-    #
-    # def test_exists_2(self):
-    #     self.assertEqual(Exists(lambda x: x > 16, V([3, 5, 8])).value, False)
-    #
-    # # FORALL
-    #
-    # def test_forall_1(self):
-    #     self.assertEqual(ForAll(lambda x: x > 6, V([3, 5, 8])).value, False)
-    #
-    # def test_forall_2(self):
-    #     self.assertEqual(ForAll(lambda x: x > 1, V([3, 5, 8])).value, True)
+    # internal_map
+
+    def test_internal_map_1(self):
+        self.assertEqual(internal_map(lambda x: x * 8, [3, 5, 8]).value, [24, 40, 64])
+
+    def test_internal_map_2(self):
+        self.assertEqual(internal_map(lambda x: x * 8, Value([3, 5, 8])).value, [24, 40, 64])
+
+    def test_internal_map_3(self):
+        self.assertEqual(internal_map(lambda x: x * 8, Null).value, "Null")
+
+    def test_internal_map_4(self):
+        self.assertEqual(internal_map(lambda x: x * 8, Stub).value, "Stub")
+
+    def test_internal_map_5(self):
+        self.assertEqual(internal_map(lambda x: x * 8, [3, Null, 8]).value, "Null")
+
+    def test_internal_map_6(self):
+        self.assertEqual(internal_map(lambda x: x * 8, Value([3, Null, 8])).value, "Null")
+
+    def test_internal_map_7(self):
+        self.assertEqual(internal_map(lambda x: x * 8, Stub).value, "Stub")
+
+    # MAP
+
+    def test_map_1(self):
+        self.assertEqual(Pretty(Map(lambda x: x * 8, [3, 5, 8])),
+                         Pretty(Eternal([24, 40, 64])))
+
+    # internal_any
+
+    def test_internal_any_1(self):
+        self.assertEqual(internal_any([3, 5, 8]).value, False)
+
+    def test_internal_any_2(self):
+        self.assertEqual(internal_any(Value([3, 5, 8])).value, False)
+
+    def test_internal_any_3(self):
+        self.assertEqual(internal_any(Value([3, 5, True])).value, True)
+
+    def test_internal_any_4(self):
+        self.assertEqual(internal_any(Value([3, 5, Value(True)])).value, True)
+
+    def test_internal_any_5(self):
+        self.assertEqual(internal_any([3, 5, Value(True)]).value, True)
+
+    def test_internal_any_6(self):
+        self.assertEqual(internal_any([3, 5, Value(False)]).value, False)
+
+    def test_internal_any_7(self):
+        self.assertEqual(internal_any([3, 5, Null]).value, "Null")
+
+    def test_internal_any_8(self):
+        self.assertEqual(internal_any(Null).value, "Null")
+
+    def test_internal_any_9(self):
+        self.assertEqual(internal_any([3, 5, Stub]).value, "Stub")
+
+    def test_internal_any_10(self):
+        self.assertEqual(internal_any(Stub).value, "Stub")
+
+    def test_internal_any_11(self):
+        self.assertEqual(internal_any([3, True, Stub]).value, True)
+
+    def test_internal_any_12(self):
+        self.assertEqual(internal_any([True, Stub]).value, True)
+
+    def test_internal_any_13(self):
+        self.assertEqual(internal_any([Value(True), Stub]).value, True)
+
+    def test_internal_any_14(self):
+        self.assertEqual(internal_any([False, False, True]).value, True)
+
+    # ANY
+
+    def test_any_1(self):
+        self.assertEqual(Pretty(Any(Eternal([True, False, False]))),
+                         Pretty(Eternal(True)))
+
+    # internal_all
+
+    def test_internal_all_1(self):
+        self.assertEqual(internal_all([3, 5, 8]).value, False)
+
+    def test_internal_all_2(self):
+        self.assertEqual(internal_all(Value([3, 5, 8])).value, False)
+
+    def test_internal_all_3(self):
+        self.assertEqual(internal_all(Value([3, 5, True])).value, False)
+
+    def test_internal_all_4(self):
+        self.assertEqual(internal_all(Value([3, 5, Value(True)])).value, False)
+
+    def test_internal_all_5(self):
+        self.assertEqual(internal_all([3, 5, Value(True)]).value, False)
+
+    def test_internal_all_6(self):
+        self.assertEqual(internal_all([3, 5, Value(False)]).value, False)
+
+    def test_internal_all_7(self):
+        self.assertEqual(internal_all([Value(True), Value(True), Value(True)]).value, True)
+
+    def test_internal_all_8(self):
+        self.assertEqual(internal_all([Value(True), True, Value(True)]).value, True)
+
+    def test_internal_all_9(self):
+        self.assertEqual(internal_all([3, 5, Stub]).value, "Stub")
+
+    def test_internal_all_10(self):
+        self.assertEqual(internal_all(Stub).value, "Stub")
+
+    def test_internal_all_11(self):
+        self.assertEqual(internal_all([3, False, Stub]).value, False)
+
+    def test_internal_all_12(self):
+        self.assertEqual(internal_all([False, Stub]).value, False)
+
+    def test_internal_all_13(self):
+        self.assertEqual(internal_all([Value(False), Stub]).value, False)
+
+    # ALL
+
+    def test_all_1(self):
+        self.assertEqual(Pretty(All(Eternal([True, False, False]))),
+                         Pretty(Eternal(False)))
+
+    def test_all_2(self):
+        self.assertEqual(Pretty(All(Eternal([True, True, True]))),
+                         Pretty(Eternal(True)))
+
+    # EXISTS
+
+    def test_exists_1(self):
+        self.assertEqual(Exists(lambda x: x > 6, Eternal([3, 5, 8])), True)
+
+    def test_exists_2(self):
+        self.assertEqual(Exists(lambda x: x > 16, Eternal([3, 5, 8])), False)
+
+    # FORALL
+
+    def test_forall_1(self):
+        self.assertEqual(ForAll(lambda x: x > 6, Eternal([3, 5, 8])), False)
+
+    def test_forall_2(self):
+        self.assertEqual(ForAll(lambda x: x > 1, Eternal([3, 5, 8])), True)
+
+    # ComposeTS
+
+    def test_compose_ts_1(self):
+        self.assertEqual(Pretty(ComposeTS([Dawn,'2003-04-02','2009-03-04'], [3,4,5])),
+                         Pretty(TS({Dawn: 3, '2003-04-02': 4, '2009-03-04': 5})))
+
+    # IsNull
+
+    def test_is_null_1(self):
+        self.assertEqual(Pretty(IsNull(TS({Dawn: 3, '2003-04-02': Null, '2009-03-04': 5}))),
+                         Pretty(TS({Dawn: False, '2003-04-02': True, '2009-03-04': False})))
+
+    def test_is_null_2(self):
+        self.assertEqual(Pretty(IsNull(TS({Dawn: 3, '2003-04-02': 4, '2009-03-04': 5}))),
+                         Pretty(TS({Dawn: False})))
+
+    def test_is_null_3(self):
+        self.assertEqual(Pretty(IsNull(TS({Dawn: Null}))),
+                         Pretty(TS({Dawn: True})))
+
+    # Manipulating CFs
+
+    def test_get_cf_1(self):
+        self.assertEqual(Pretty(GetCF(TS({Dawn: 3, '2003-04-02': Null, '2009-03-04': 5}))),
+                         Pretty(TS({Dawn: 1})))
+
+    def test_get_cf_2(self):
+        self.assertEqual(Pretty(GetCF(TS({Dawn: Value(3,cf=.8), '2003-04-02': Value(3,cf=.2), '2009-03-04': Value(3,cf=.1)}))),
+                         Pretty(TS({Dawn: .8, '2003-04-02': .2, '2009-03-04': .1})))
+
+    def test_get_cf_3(self):
+        self.assertEqual(Pretty(GetCF(TS({Dawn: Value(3,cf=.2), '2003-04-02': Value(3,cf=.2), '2009-03-04': Value(3,cf=.2)}))),
+                         Pretty(Eternal(.2)))
+
+    def test_set_cf_1(self):
+        self.assertEqual(Pretty(SetCF(TS({Dawn: 3, '2003-04-02': 4}),
+                                      TS({Dawn: .2, '2005-04-02': .8}))),
+                         Pretty(TS({Dawn: Value(3, cf=.2), '2003-04-02': Value(4, cf=.2), '2005-04-02': Value(4, cf=.8)})))
+
+    def test_set_cf_2(self):
+        self.assertEqual(Pretty(SetCF(TS({Dawn: 3, '2003-04-02': 4}), Eternal(.7))),
+                         Pretty(TS({Dawn: Value(3, cf=.7), '2003-04-02': Value(4, cf=.7)})))
+
+    def test_set_cf_3(self):
+        self.assertEqual(Pretty(SetCF(TS({Dawn: 3, '2003-04-02': 4}), .7)),
+                         Pretty(TS({Dawn: Value(3, cf=.7), '2003-04-02': Value(4, cf=.7)})))
+
+    def test_set_cf_4(self):
+        self.assertEqual(Pretty(SetCF(234, .7)),
+                         Pretty(TS({Dawn: Value(234, cf=.7)})))
+
+    def test_rescale_cf_1(self):
+        self.assertEqual(Pretty(RescaleCF(TS({Dawn: Value(3, cf=1), '2003-04-02': Value(4, cf=.5)}), .5)),
+                         Pretty(TS({Dawn: Value(3, cf=.5), '2003-04-02': Value(4, cf=.25)})))
+
+    # Simple mathematical functions
+
+    def test_math_1(self):
+        self.assertEqual(Pretty(Ceil(TS({Dawn: 3, '2003-04-02': Null, '2009-03-04': 5}))),
+                         Pretty(TS({Dawn: 3, '2003-04-02': Null, '2009-03-04': 5})))
+
+    def test_math_2(self):
+        self.assertEqual(Pretty(Ceil(TS({Dawn: 3.5, '2003-04-02': Stub, '2009-03-04': 5.0}))),
+                         Pretty(TS({Dawn: 4, '2003-04-02': Stub, '2009-03-04': 5})))
+
+    def test_math_3(self):
+        self.assertEqual(Pretty(Ceil(Eternal(3.4))),
+                         Pretty(Eternal(4)))
+
+    def test_math_4(self):
+        self.assertEqual(Pretty(Ceil(3.4)),
+                         Pretty(Eternal(4)))
+
+    def test_math_5(self):
+        self.assertEqual(Pretty(Floor(3.4)),
+                         Pretty(Eternal(3)))
+
+    def test_math_6(self):
+        self.assertEqual(Pretty(Pow(TS({Dawn: 2, '2003-04-02': Stub, '2009-03-04': 3}), 2)),
+                         Pretty(TS({Dawn: 4.0, '2003-04-02': Stub, '2009-03-04': 9.0})))
+
+    # DayDelta
+
+    def test_day_delta_1(self):
+        self.assertEqual(Pretty(DayDelta('2000-01-01', TS({Dawn: '2003-04-02', '2013-04-02': '2023-04-02'}))),
+                         Pretty(TS({Dawn: 1187, '2013-04-02': 8492})))
+
+    def test_day_delta_2(self):
+        self.assertEqual(Pretty(DayDelta('2000-01-01', '2000-01-03')),
+                         Pretty(Eternal(2)))
+
+    def test_day_delta_3(self):
+        self.assertEqual(Pretty(DayDelta('2000-01-01', Stub)),
+                         Pretty(Eternal(Stub)))
+
+    # Date decomposition
+
+    def test_date_decomp_1(self):
+        self.assertEqual(Pretty(Year(TS({Dawn: '2003-04-02', '2013-04-02': '2023-04-02'}))),
+                         Pretty(TS({Dawn: 2003, '2013-04-02': 2023})))
+
+    def test_date_decomp_2(self):
+        self.assertEqual(Pretty(Month(TS({Dawn: '2003-04-02', '2013-04-02': '2023-04-02'}))),
+                         Pretty(Eternal(4)))
+
+    def test_date_decomp_3(self):
+        self.assertEqual(Pretty(Day(TS({Dawn: '2003-04-02', '2013-04-02': '2023-04-02'}))),
+                         Pretty(Eternal(2)))
 
 
 # Used to test time series logic

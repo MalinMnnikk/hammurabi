@@ -75,7 +75,7 @@ class TimeSeries:
         return process_binary_ts(internal_eq, self, o)
 
     def __ne__(self, o):
-        return Not((self == o))
+        return process_binary_ts(internal_ne, self, o)
 
     def __gt__(self, o):
         return process_binary_ts(internal_gt, self, o)
@@ -107,14 +107,24 @@ def internal_ts_thread(ts1: dict, ts2: dict):
 # Output: dictionary
 def internal_ts_map_unary_fcn(f, ts: dict):
     vals = [f(x) for x in ts.values()]
-    return internal_ts_from_keys_vals(ts.keys(), vals)
+    return internal_ts_trim(internal_compose_ts(ts.keys(), vals))
+
+
+# Apply a unary function to a Value object
+# Output: Value
+def internal_process_unary_fcn_val(f, a_in: Value):
+    a = try_converting_to_val(a_in)
+    if a.is_stub or a.is_null:
+        return a
+    else:
+        return Value(f(a.value), cf=a.cf)
 
 
 # Map a binary function to the values of a time series dictionary
 # Output: dictionary
 def internal_ts_map_binary_fcn(f, ts: dict):
     vals = [f(x, y) for [x, y] in ts.values()]
-    return internal_ts_from_keys_vals(ts.keys(), vals)
+    return internal_compose_ts(ts.keys(), vals)
 
 
 # Apply a binary function to two TimeSeries objects
@@ -154,17 +164,19 @@ def internal_ts_sort(ts: dict):
 
 # Build a time series dictionary from lists of keys and values
 # Output: dictionary
-def internal_ts_from_keys_vals(keys: list, values: list):
+def internal_compose_ts(keys: list, values: list):
     return dict(zip(keys, values))
 
 
-# If item is a Value object, return it; otherwise convert it to a Value object
+# If item is a TimeSeries, return it; otherwise convert it to a proper TimeSeries
 # Output: TimeSeries
 def try_converting_to_ts(a):
     if isinstance(a, TimeSeries):
         return a
-    else:
+    elif isinstance(a, Value):
         return TimeSeries(a)
+    else:
+        return TimeSeries(Value(a))
 
 
 # INSTANTIATE A TIME SERIES

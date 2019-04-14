@@ -2,7 +2,7 @@ import functools
 import math
 from datetime import date, timedelta, datetime
 from dateutil.relativedelta import relativedelta
-from pandas import date_range
+# from pandas import date_range
 from akkadian.TimeSeries import *
 from akkadian.Value import *
 
@@ -13,7 +13,7 @@ from akkadian.Value import *
 # Time series NOT
 # Output: TimeSeries
 def Not(ts: TimeSeries):
-    return TimeSeries(internal_ts_map_unary_fcn(internal_not, ts.dict))
+    return TimeSeries(internal_ts_map_unary_fcn(internal_not, try_converting_to_ts(ts).dict))
 
 
 # Internal, static version of the logical NOT function
@@ -116,6 +116,10 @@ def internal_or(a_in: Value, b_in: Value):
 # TODO: Time series
 # TODO: Implement lazy evaluation so args are only invoked as needed
 def If(*args):
+    return Eternal(internal_if(1, *args))
+
+
+def if_for_values(*args):
     return internal_if(1, *args)
 
 
@@ -150,6 +154,14 @@ def internal_if(cf, *args):
         return internal_if(min(cf, arg0.cf), *args[2:])
 
 
+# COMPOSE A TIME SERIES
+
+
+# Compose a time series from a list of dates and a list of values
+def ComposeTS(dates: list, values: list):
+    return TS(internal_compose_ts(dates, values))
+
+
 # CONSTRUCTING BOOLEAN TIME SERIES
 
 
@@ -172,6 +184,66 @@ def EffectiveBetween(start, end):
 # Creates a time series that has a given value forever
 def Eternal(val):
     return TimeSeries({1: try_converting_to_val(val)})
+
+
+# IDENTIFYING INDETERMINATE PERIODS
+
+
+# Returns True when a TimeSeries is Null; otherwise returns False
+# Output: TimeSeries
+def IsNull(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_is_null, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the IsNull function
+# Output: Value
+def internal_is_null(a_in: Value):
+    return Value(try_converting_to_val(a_in).is_null)
+
+
+# Returns True when a TimeSeries is Stub; otherwise returns False
+# Output: TimeSeries
+def IsStub(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_is_stub, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the IsStub function
+# Output: Value
+def internal_is_stub(a_in: Value):
+    return Value(try_converting_to_val(a_in).is_stub)
+
+
+# MANIPULATING CERTAINTY FACTORS
+
+
+# Get the certainty factor (CF) of the values in the time line
+# Output: TimeSeries
+def GetCF(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_get_cf, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the GetCF function
+# Output: Value
+def internal_get_cf(a_in: Value):
+    return Value(try_converting_to_val(a_in).cf)
+
+
+# Set the CF on a time series (the CF can vary over time)
+# Output: TimeSeries
+def SetCF(ts, cf):
+    return process_binary_ts(_set_cf, ts, cf)
+
+
+# Internal, static version of SetCF
+# Output: Value
+def _set_cf(v: Value, cf: Value):
+    return Value(v.value, cf=max(min(cf.value, 1), 0))
+
+
+# Rescales the CF of a TimeSeries by a given factor
+# Output: TimeSeries
+def RescaleCF(ts, factor):
+    return SetCF(ts, GetCF(ts) * factor)
 
 
 # DATE ARITHMETIC
@@ -247,28 +319,31 @@ def _simple_add_years(d: str, n: int):
     return (str_to_date(d) + relativedelta(years=n)).isoformat()
 
 
-
-
-
-
-
 # DATE ARITHMETIC: ___Delta
 # Currently does later - earlier and then converts to the desired interval
 
 
 # Determine the number of days between two dates
-# def DayDelta(earlier, later):
-#     return process_binary(lambda x, y: _day_delta(x, y), earlier, later)
+# Output: TimeSeries
+def DayDelta(earlier, later):
+    return process_binary_ts(_day_delta_values, earlier, later)
+
+
+# Internal, static version of the DayDelta function
+# Output: Value
+def _day_delta_values(earlier: Value, later: Value):
+    return process_binary_val(_day_delta, earlier, later)
 
 
 # Scalar version of DayDelta (for internal use only)
-# def _day_delta(earlier, later):
-#     return (date.fromisoformat(later) - date.fromisoformat(earlier)).days
+# Output: Integer
+def _day_delta(earlier, later):
+    return (date.fromisoformat(later) - date.fromisoformat(earlier)).days
 
 
 # Determine the number of weeks between two dates
-# def WeekDelta(earlier, later):
-#     return DayDelta(earlier, later) / 7
+def WeekDelta(earlier, later):
+    return DayDelta(earlier, later) / 7
 
 
 # def month_delta(earlier, later):
@@ -278,16 +353,41 @@ def _simple_add_years(d: str, n: int):
 
 # DECOMPOSING A DATE
 
-# def Year(dt):
-#     return process_unary(lambda x: date.fromisoformat(x).year, dt)
-#
-#
-# def Month(dt):
-#     return process_unary(lambda x: date.fromisoformat(x).month, dt)
-#
-#
-# def Day(dt):
-#     return process_unary(lambda x: date.fromisoformat(x).day, dt)
+
+# Given a date, return the year
+# Output: TimeSeries
+def Year(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_get_year, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Year function
+# Output: Value
+def internal_get_year(dt: Value):
+    return internal_process_unary_fcn_val(lambda x: date.fromisoformat(x).year, dt)
+
+
+# Given a date, return the month
+# Output: TimeSeries
+def Month(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_get_month, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Month function
+# Output: Value
+def internal_get_month(dt: Value):
+    return internal_process_unary_fcn_val(lambda x: date.fromisoformat(x).month, dt)
+
+
+# Given a date, return the day
+# Output: TimeSeries
+def Day(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_get_day, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Day function
+# Output: Value
+def internal_get_day(dt: Value):
+    return internal_process_unary_fcn_val(lambda x: date.fromisoformat(x).day, dt)
 
 
 # MATH
@@ -295,38 +395,81 @@ def _simple_add_years(d: str, n: int):
 
 
 # Time series version of math.ceil(x)
-# def Ceil(x):
-#     return process_unary(math.ceil, x)
+# Output: TimeSeries
+def Ceil(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_math_ceil, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Ceil function
+# Output: Value
+def internal_math_ceil(a: Value):
+    return internal_process_unary_fcn_val(math.ceil, a)
 
 
 # Time series version of math.floor(x)
-# def Floor(x):
-#     return process_unary(math.floor, x)
+# Output: TimeSeries
+def Floor(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_math_floor, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Ceil function
+# Output: Value
+def internal_math_floor(a: Value):
+    return internal_process_unary_fcn_val(math.floor, a)
 
 
 # Time series version of math.remainder(x, y)
+# Output: TimeSeries
 # def Remainder(x, y):
 #     return process_binary(lambda a, b: math.remainder(a, b), x, y)
 
 
 # Time series version of math.trunc(x)
-# def Trunc(x):
-#     return process_unary(math.trunc, x)
+# Output: TimeSeries
+def Trunc(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_math_trunc, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Trunc function
+# Output: Value
+def internal_math_trunc(a: Value):
+    return internal_process_unary_fcn_val(math.trunc, a)
 
 
 # Time series version of math.exp(x)
-# def Exp(x):
-#     return process_unary(math.exp, x)
+# Output: TimeSeries
+def Exp(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_math_exp, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Trunc function
+# Output: Value
+def internal_math_exp(a: Value):
+    return internal_process_unary_fcn_val(math.exp, a)
 
 
 # Time series version of math.log(x[, base])
-# def Log(x, base=math.e):
-#     return process_binary(lambda a, b: math.log(a, b), x, base)
+# Output: TimeSeries
+def Log(x, base=math.e):
+    return process_binary_ts(_log_values, x, y)
+
+
+# Internal, static version of the Log function
+# Output: Value
+def _log_values(x: Value, y: Value):
+    return process_binary_val(math.log, x, y)
 
 
 # Time series version of math.pow(x, y)
-# def Pow(x, y):
-#     return process_binary(lambda a, b: math.pow(a, b), x, y)
+# Output: TimeSeries
+def Pow(x, y):
+    return process_binary_ts(_pow_values, x, y)
+
+
+# Internal, static version of the Pow function
+# Output: Value
+def _pow_values(x: Value, y: Value):
+    return process_binary_val(math.pow, x, y)
 
 
 # For consistency...
@@ -354,7 +497,12 @@ def AsOf(ts, dt):
 # TODO...
 
 # def BalancingTest(*args):
-#     score = Total(Map(lambda x, y: Bool(x) * y, Partition(args, 2)))
+#     score = Total(Map(lambda x: Boole(x[0]) * x[1], args))
 #     limit = If(score < 0, x, y)
-#     return RescaleCF(Bool(score), score/limit)
+#     return RescaleCF(score > 0, score/limit)
 
+
+# Returns 1 if the input value is True; otherwise returns 0
+# Output: TimeSeries
+def Boole(ts):
+    return If(ts, 1, 0)
