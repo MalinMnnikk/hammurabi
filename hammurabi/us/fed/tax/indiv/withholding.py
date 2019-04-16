@@ -1,3 +1,5 @@
+import hammurabi.shared.fam as fam
+
 from akkadian import *
 
 
@@ -43,7 +45,7 @@ def only_job_or_low_wage_second(p, s):
     # dev question, could we infer "only one job" as one active wages/employment record? Probably a question for policy team.
     return Or(
             And(
-                Or(is_single(p),
+                Or(fam.is_single(p),
                    mfs(p, s)),
                 has_only_one_job(p)),
             And(mfj(p),
@@ -65,9 +67,9 @@ def ctc_count(p, s):
 
 
 def ctc_w_spouse(p, s):
-    return If(marital_income(p, s) < 103351, 4 * num_children(p),
-              marital_income(p, s) <= 345850, 2 * num_children(p),
-              marital_income(p, s) <= 400000, num_children(p),
+    return If(joint_income(p, s) < 103351, 4 * num_children(p),
+              joint_income(p, s) <= 345850, 2 * num_children(p),
+              joint_income(p, s) <= 400000, num_children(p),
               0)
 
 
@@ -91,9 +93,9 @@ def credit_for_other_deps(p, s):
 
 
 def credit_for_other_deps_w_spouse(p, s):
-    return If(marital_income(p, s) < 103351, num_dependents(p),
-              marital_income(p, s) <= 345850, Floor(num_dependents(p) / 2),
-              marital_income(p, s) > 345850, 0)
+    return If(joint_income(p, s) < 103351, num_dependents(p),
+              joint_income(p, s) <= 345850, Floor(num_dependents(p) / 2),
+              joint_income(p, s) > 345850, 0)
 
 
 def credit_for_other_deps_w_o_spouse(p):
@@ -135,7 +137,7 @@ def ded_adj_adtl_inc_line_1(p):
 def ded_adj_adtl_inc_line_2(p):
     return If(Or(filing_jointly(p), qualifying_widower(p)), 24400,
               hoh(p), 18350,
-              Or(is_single(p), filing_separately(p)), 12200)
+              Or(fam.is_single(p), filing_separately(p)), 12200)
 
 
 # Subtract line 2 from line 1. If zero or less, enter “-0-”
@@ -209,7 +211,7 @@ def temj_wksht_required_single(p):
 
 
 def temj_wksht_required_couple(p, s):
-    return And(is_married(p),
+    return And(fam.is_married(p),
                filing_jointly(p),
                couple_both_work(p, s),
                combined_couple_wages(p, s) > 24450)
@@ -228,7 +230,7 @@ def temj_wksht_line_1(p, s):
 # married filing jointly and wages from the highest paying job are $75,000 or less and the combined wages for
 # you and your spouse are $107,000 or less, don’t enter more than “3”
 def temj_wksht_line_2(p, s):
-    return If(And(is_married(p),
+    return If(And(fam.is_married(p),
                   filing_jointly(p),
                   highest_earning_job_from_couple(p, s) <= 75000,
                   combined_couple_wages(p, s)),
@@ -358,13 +360,13 @@ def temj_wksht_table_1_others_lookup(wages):
 
 # Are the taxpayer and their spouse married filing jointly?
 def mfj(p):
-    return And(is_married(p),
+    return And(fam.is_married(p),
                filing_jointly(p))
 
 
 # Are the taxpayer and their spouse married filing separately?
 def mfs(p, s):
-    return And(is_married(p),
+    return And(fam.is_married(p),
                filing_separately(p))
 
 
@@ -377,20 +379,6 @@ def filing_jointly(p):
     return tax_status(p) == "Married Filing Jointly"
 
 
-# FAMILY STATUS
-
-
-def is_married(p):
-    return marital_status(p) == "Married"
-
-
-# certainty < 1, is single single or is single/widowed single?
-def is_single(p):
-    return Or(marital_status(p) == "Single, unmarried, or legally separated",
-              marital_status(p) == "Widowed (spouse died during the tax year)",
-              marital_status(p) == "Widowed (spouse died before the tax year)")
-
-
 # HOUSEHOLD EMPLOYMENT AND INCOME
 
 
@@ -399,13 +387,13 @@ def spouse_unemployed(s):
 
 
 # Total income of a person and their spouse
-def marital_income(p, s):
+def joint_income(p, s):
     return total_income(p) + total_income(s)
 
 
 def combined_couple_wages(p, s):
     # wages from person's first job, wages from spouse's job
-    return If(is_single(p), wages_from_second_job(p),
+    return If(fam.is_single(p), wages_from_second_job(p),
               wages_from_second_job(p) + persons_wages(s))
 
 
@@ -415,10 +403,6 @@ def has_only_one_job(p):
 
 ############### base input rules ###############
 # base level attributes? Can we make these "fall out"?
-
-
-def marital_status(p):
-    return (In("str", "marital_status", p, None, "What is {0}'s marital status?"))
 
 
 def tax_status(p):
