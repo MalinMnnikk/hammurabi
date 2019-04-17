@@ -1,6 +1,11 @@
 from flask import Flask, render_template, request
-from akkadian.session import *
-from hammurabi.us.fed.tax.indiv.withholding import *
+import sys
+
+if __name__ == "__main__":
+    sys.path.append('c://hammurabi')
+    # print(sys.path)
+    from akkadian.session import * 
+    from hammurabi.us.fed.tax.indiv.withholding import form_w4_complete
 
 
 app = Flask(__name__)
@@ -9,8 +14,8 @@ app = Flask(__name__)
 @app.route("/")
 def investigate_goal():
     # return render_template('main_interview.html')
-    return Investigate([(form_w4_complete, "Hub", "Wife")])
-    # return interview_investigate([(form_w4_complete, "Hub", "Wife")])
+    # return Investigate([(form_w4_complete, "Hub", "Wife")])
+    return interview_investigate([(form_w4_complete, "Hub", "Wife")])
    
 
 @app.route('/', methods=['POST'])
