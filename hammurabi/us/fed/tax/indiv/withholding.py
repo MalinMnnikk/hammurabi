@@ -42,16 +42,16 @@ def pa_wksht_complete(p, s):
 # • You’re single, or married filing separately, and have only one job; or
 # •  You’re married filing jointly, have only one job, and your spouse doesn’t work; or
 # • Your wages from a second job or your spouse’s wages (or the total of both) are $1,500 or less
+# dev question, could we infer "only one job" as one active wages/employment record? Probably a question for policy team.
 def only_job_or_low_wage_second(p, s):
-    # dev question, could we infer "only one job" as one active wages/employment record? Probably a question for policy team.
     return Or(
-            And(
-                Or(fam.is_single(p),
-                   tax.mfs(p)),
-                has_only_one_job(p)),
-            And(tax.mfj(p),
-                has_only_one_job(p),
-                spouse_unemployed(s)),
+              And(
+                  Or(fam.is_single(p),
+                     tax.mfs(p)),
+                  has_only_one_job(p)),
+               And(tax.mfj(p),
+                   has_only_one_job(p),
+               spouse_unemployed(s)),
             combined_couple_wages(p, s) <= 1500)
 
 
@@ -381,11 +381,11 @@ def has_only_one_job(p):
 
 
 def is_claiming_self(p):
-    return (In("bool", "claim_self", p, None, "Does {0} intend to claim themself?"))
+    return In("bool", "claim_self", p, None, "Does {0} intend to claim themself?")
 
 
 def employment_status(p):
-    return (In("str", "employment_status", p, None, "What is {0}'s employment status?"))
+    return In("str", "employment_status", p, None, "What is {0}'s employment status?")
 
 
 def wages_from_second_job(p):
@@ -428,7 +428,6 @@ def estimate_2019_nonwage_inc_not_subj_to_withholding(p):
 
 def highest_earning_job_wages(p):
     return In("num", "highest_earning_job_total_wages", p, None, "Enter the wages from {0}'s highest earning job.")
-
 
 
 def couple_both_work(p, s):
