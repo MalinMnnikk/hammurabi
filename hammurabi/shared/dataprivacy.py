@@ -5,7 +5,6 @@ import hammurabi.shared.geo as geo
 # DATA MODEL
 
 
-intended_activities = None
 activity_date = None
 date_of_data_collection = None
 subject_type = None
@@ -39,6 +38,14 @@ def controller_country(data):
 # Country in which the data processor is located
 def processor_country(data):
     return geo.country_location(processor(data))
+
+
+def industry_is(data):
+    return "TODO"
+
+
+def activities_include(data, activities: list):
+    return IsIntersection(intended_activities(data), activities)
 
 
 # HIGH-LEVEL RULE
@@ -99,3 +106,7 @@ def controller(data):
 
 def processor(data):
     return In("str", "shared.dataprivacy.data_processor", data, None, "Who is the data processor?")
+
+def intended_activities(data):
+    return In("list", "shared.dataprivacy.intended_activities", data, None,
+              "What does the data controller intend to do with the data?")    # "data controller"?
