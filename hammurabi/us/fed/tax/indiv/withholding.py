@@ -1,4 +1,5 @@
 import hammurabi.shared.fam as fam
+import hammurabi.us.fed.tax.indiv.shared as tax
 
 from akkadian import *
 
@@ -23,7 +24,7 @@ from akkadian import *
 ############### source rules ###############
 def form_w4_complete(p, s):
     return And(pa_wksht_complete(p, s),
-               Or(Not(itemizing(p)),
+               Or(Not(tax.itemizing(p)),
                   daai_wksht_complete(p)),
                Or(Not(temj_wksht_required(p, s)),
                   temj_wksht_complete(p, s)))
@@ -41,16 +42,16 @@ def pa_wksht_complete(p, s):
 # • You’re single, or married filing separately, and have only one job; or
 # •  You’re married filing jointly, have only one job, and your spouse doesn’t work; or
 # • Your wages from a second job or your spouse’s wages (or the total of both) are $1,500 or less
+# dev question, could we infer "only one job" as one active wages/employment record? Probably a question for policy team.
 def only_job_or_low_wage_second(p, s):
-    # dev question, could we infer "only one job" as one active wages/employment record? Probably a question for policy team.
     return Or(
-            And(
-                Or(fam.is_single(p),
-                   mfs(p, s)),
-                has_only_one_job(p)),
-            And(mfj(p),
-                has_only_one_job(p),
-                spouse_unemployed(s)),
+              And(
+                  Or(fam.is_single(p),
+                     tax.mfs(p)),
+                  has_only_one_job(p)),
+               And(tax.mfj(p),
+                   has_only_one_job(p),
+               spouse_unemployed(s)),
             combined_couple_wages(p, s) <= 1500)
 
 
@@ -62,21 +63,21 @@ def only_job_or_low_wage_second(p, s):
 # each eligible child.
 # • If your total income will be higher than $200,000 ($400,000 if married filing jointly), enter -0- . . . . . . .
 def ctc_count(p, s):
-    If(And(s is not None, mfj(p)), ctc_w_spouse(p, s),
+    If(And(s is not None, tax.mfj(p)), ctc_w_spouse(p, s),
        ctc_w_o_spouse(p))
 
 
 def ctc_w_spouse(p, s):
-    return If(joint_income(p, s) < 103351, 4 * num_children(p),
-              joint_income(p, s) <= 345850, 2 * num_children(p),
-              joint_income(p, s) <= 400000, num_children(p),
+    return If(joint_income(p, s) < 103351, 4 * num_ctc_children(p),
+              joint_income(p, s) <= 345850, 2 * num_ctc_children(p),
+              joint_income(p, s) <= 400000, num_ctc_children(p),
               0)
 
 
 def ctc_w_o_spouse(p):
-    return If(total_income(p) < 71201, 4 * num_children(p),
-              total_income(p) <= 179051, 2 * num_children(p),
-              total_income(p) <= 200000, num_children(p),
+    return If(total_income(p) < 71201, 4 * num_ctc_children(p),
+              total_income(p) <= 179051, 2 * num_ctc_children(p),
+              total_income(p) <= 200000, num_ctc_children(p),
               0)
 
 
@@ -88,27 +89,27 @@ def ctc_w_o_spouse(p):
 # • If your total income will be higher than $179,050 ($345,850 if married filing jointly), enter “-0-” . . . . . .
 def credit_for_other_deps(p, s):
     If(s is not None,
-       And(credit_for_other_deps_w_spouse(p, s), mfj(p)),
+       And(credit_for_other_deps_w_spouse(p, s), tax.mfj(p)),
        credit_for_other_deps_w_o_spouse(p))
 
 
 def credit_for_other_deps_w_spouse(p, s):
-    return If(joint_income(p, s) < 103351, num_dependents(p),
-              joint_income(p, s) <= 345850, Floor(num_dependents(p) / 2),
+    return If(joint_income(p, s) < 103351, num_ctc_dependents(p),
+              joint_income(p, s) <= 345850, Floor(num_ctc_dependents(p) / 2),
               joint_income(p, s) > 345850, 0)
 
 
 def credit_for_other_deps_w_o_spouse(p):
-    return If(total_income(p) < 71201, num_dependents(p),
-              total_income(p) <= 179051, Floor(num_dependents(p) / 2),
+    return If(total_income(p) < 71201, num_ctc_dependents(p),
+              total_income(p) <= 179051, Floor(num_ctc_dependents(p) / 2),
               total_income(p) > 179050, 0)
 
 
 # Total on line h
 def pa_wksht_line_h(p, s):
     return Boole(is_claiming_self(p)) \
-           + Boole(mfj(p)) \
-           + Boole(hoh(p)) \
+           + Boole(tax.mfj(p)) \
+           + Boole(tax.hoh(p)) \
            + Boole(only_job_or_low_wage_second(p, s)) \
            + ctc_count(p, s) \
            + credit_for_other_deps(p, s) \
@@ -135,9 +136,9 @@ def ded_adj_adtl_inc_line_1(p):
 # $18,350 if you’re head of household
 # $12,200 if you’re single or married filing separately } . .
 def ded_adj_adtl_inc_line_2(p):
-    return If(Or(filing_jointly(p), qualifying_widower(p)), 24400,
-              hoh(p), 18350,
-              Or(fam.is_single(p), filing_separately(p)), 12200)
+    return If(Or(tax.mfj(p), tax.qualifying_widower(p)), 24400,
+              tax.hoh(p), 18350,
+              Or(fam.is_single(p), tax.mfs(p)), 12200)
 
 
 # Subtract line 2 from line 1. If zero or less, enter “-0-”
@@ -211,8 +212,7 @@ def temj_wksht_required_single(p):
 
 
 def temj_wksht_required_couple(p, s):
-    return And(fam.is_married(p),
-               filing_jointly(p),
+    return And(tax.mfj(p),
                couple_both_work(p, s),
                combined_couple_wages(p, s) > 24450)
 
@@ -222,7 +222,7 @@ def temj_wksht_required_couple(p, s):
 # worksheet)
 # tbd, logic to figure out which wksht has been completed
 def temj_wksht_line_1(p, s):
-    return If(itemizing(p), ded_adj_adtl_inc_line_10(p, s),
+    return If(tax.itemizing(p), ded_adj_adtl_inc_line_10(p, s),
               pa_wksht_line_h(p, s))
 
 
@@ -230,15 +230,14 @@ def temj_wksht_line_1(p, s):
 # married filing jointly and wages from the highest paying job are $75,000 or less and the combined wages for
 # you and your spouse are $107,000 or less, don’t enter more than “3”
 def temj_wksht_line_2(p, s):
-    return If(And(fam.is_married(p),
-                  filing_jointly(p),
+    return If(And(tax.mfj(p),
                   highest_earning_job_from_couple(p, s) <= 75000,
                   combined_couple_wages(p, s)),
               # assumes only one job, needs to be expanded
-              Min([3, temj_wksht_table_1_mfj_lookup(Min([persons_wages(p), persons_wages(s)]))]),
-              (mfj(p),
-               temj_wksht_table_1_mfj_lookup(combined_couple_wages(p, s))),
-              temj_wksht_table_1_others_lookup(persons_wages(p)))
+              Min([3, temj_wksht_tbl_1_mfj(Min([annual_wages(p), annual_wages(s)]))]),
+              (tax.mfj(p),
+               temj_wksht_tbl_1_mfj(combined_couple_wages(p, s))),
+              temj_wksht_tbl_1_others(annual_wages(p)))
 
 
 # If line 1 is more than or equal to line 2, subtract line 2 from line 1. Enter the result here (if zero, enter “-0-”)
@@ -261,17 +260,17 @@ def temj_wksht_line_5(p, s):
     return temj_wksht_line_1(p, s)
 
 
-# 6 Subtract line 5 from line 4
+# Subtract line 5 from line 4
 def temj_wksht_line_6(p, s):
     return temj_wksht_line_4(p, s) - temj_wksht_line_5(p, s)
 
 
 # Find the amount in Table 2 below that applies to the HIGHEST paying job and enter it here
 def temj_wksht_line_7(p, s):
-    return If(mfj(p),
+    return If(tax.mfj(p),
               # assumes one job, needs to be expanded
-              temj_wksht_table_2_mfj_lookup(Max([persons_wages(p), persons_wages(s)])),
-              temj_wksht_table_2_others_lookup(persons_wages(p)))
+              temj_wksht_tbl_2_mfj(Max([annual_wages(p), annual_wages(s)])),
+              temj_wksht_tbl_2_others(annual_wages(p)))
 
 
 # Multiply line 7 by line 6 and enter the result here. This is the additional annual withholding needed
@@ -291,7 +290,7 @@ def highest_earning_job_from_couple(p, s):
     return Max([highest_earning_job_wages(p), highest_earning_job_wages(s)])
 
 
-def temj_wksht_table_2_mfj_lookup(wages):
+def temj_wksht_tbl_2_mfj(wages):
     return If(wages <= 24900, 420,
               wages <= 84450, 500,
               wages <= 173900, 910,
@@ -301,7 +300,7 @@ def temj_wksht_table_2_mfj_lookup(wages):
               1540)
 
 
-def temj_wksht_table_2_others_lookup(wages):
+def temj_wksht_tbl_2_others(wages):
     return If(wages <= 7200, 420,
               wages <= 36975, 500,
               wages <= 81700, 910,
@@ -311,7 +310,7 @@ def temj_wksht_table_2_others_lookup(wages):
               1540)
 
 
-def temj_wksht_table_1_mfj_lookup(wages):
+def temj_wksht_tbl_1_mfj(wages):
     return If(wages <= 5000, 0,
               wages <= 9500, 1,
               wages <= 19500, 2,
@@ -334,7 +333,7 @@ def temj_wksht_table_1_mfj_lookup(wages):
               19)
 
 
-def temj_wksht_table_1_others_lookup(wages):
+def temj_wksht_tbl_1_others(wages):
     return If(wages <= 7000, 0,
               wages <= 13000, 1,
               wages <= 27500, 2,
@@ -355,30 +354,6 @@ def temj_wksht_table_1_others_lookup(wages):
               17)
 
 
-# FILING STATUSES
-
-
-# Are the taxpayer and their spouse married filing jointly?
-def mfj(p):
-    return And(fam.is_married(p),
-               filing_jointly(p))
-
-
-# Are the taxpayer and their spouse married filing separately?
-def mfs(p, s):
-    return And(fam.is_married(p),
-               filing_separately(p))
-
-
-def filing_separately(p):
-    return Not(filing_jointly(p))
-
-
-# Status selected is MFJ
-def filing_jointly(p):
-    return tax_status(p) == "Married Filing Jointly"
-
-
 # HOUSEHOLD EMPLOYMENT AND INCOME
 
 
@@ -394,7 +369,7 @@ def joint_income(p, s):
 def combined_couple_wages(p, s):
     # wages from person's first job, wages from spouse's job
     return If(fam.is_single(p), wages_from_second_job(p),
-              wages_from_second_job(p) + persons_wages(s))
+              wages_from_second_job(p) + annual_wages(s))
 
 
 def has_only_one_job(p):
@@ -405,20 +380,12 @@ def has_only_one_job(p):
 # base level attributes? Can we make these "fall out"?
 
 
-def tax_status(p):
-    return In("str", "tax_status", p, None, "How does {0} plan to file taxes?")
-
-
-def hoh(p):
-    return (In("bool", "head_of_household", p, None, "Is {0} the head of their household?"))
-
-
 def is_claiming_self(p):
-    return (In("bool", "claim_self", p, None, "Does {0} intend to claim themself?"))
+    return In("bool", "claim_self", p, None, "Does {0} intend to claim themself?")
 
 
 def employment_status(p):
-    return (In("str", "employment_status", p, None, "What is {0}'s employment status?"))
+    return In("str", "employment_status", p, None, "What is {0}'s employment status?")
 
 
 def wages_from_second_job(p):
@@ -426,7 +393,7 @@ def wages_from_second_job(p):
               "What was the total sum of wages for {0} from their second job last year?")
 
 
-def persons_wages(p):
+def annual_wages(p):
     return In("num", "wages", p, None, "What was the total sum of wages for {0} last year?")
 
 
@@ -463,16 +430,11 @@ def highest_earning_job_wages(p):
     return In("num", "highest_earning_job_total_wages", p, None, "Enter the wages from {0}'s highest earning job.")
 
 
-def itemizing(p):
-    return In("bool", "plans_to_itemize_or_claim_adjustments", p, None,
-              "Does {0} plan  to itemize or claim adjustments to income and want to reduce "
-              + "their withholding, or if do they have a large amount of nonwage income not subject to withholding and want to increase their withholding.")
-
-
 def couple_both_work(p, s):
     return In("bool", "couple_both_work", p, s, "Do {0} and {1} both work?")
 
 
+# TODO: This should be calculated from some lower-level facts
 def pay_periods_remaining_in_year(p):
     return In("num", "pay_periods_remaining", p, None,
               "Enter the number of pay periods remaining in the year for {0}, " +
@@ -484,15 +446,11 @@ def total_income(p):
     return In("num", "total_income", p, None, "Enter the total expected annual income for {0}")
 
 
-def num_children(p):
+def num_ctc_children(p):
     return In("num", "number_children_pub_972", p, None,
               "Enter the number of eligible children from Publication 972, Child Tax Credit for {0}")
 
 
-def num_dependents(p):
+def num_ctc_dependents(p):
     return In("num", "num_dep_pub_972", p, None,
               "Enter the number of eligible dependents from Publication 972, Child Tax Credit for {0}")
-
-
-def qualifying_widower(p):
-    return In("bool", "qualifying_widower", p, None, "Is {0} a qualifying widower?")
