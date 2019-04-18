@@ -1,13 +1,11 @@
 from flask import Flask, render_template, request
-import sys
+from akkadian import *
+# from hammurabi import *
+from ..hammurabi.us.fed.tax.indiv import withholding as withholding
 
-if __name__ == "__main__":
-    sys.path.append('c://hammurabi')
-    # print(sys.path)
-    from akkadian.session import * 
-    from hammurabi.us.fed.tax.indiv.withholding import form_w4_complete
+# print(withholding.__file__)
 
-
+print(dir())
 app = Flask(__name__)
 
 # set FLASK_APP=interview.py
