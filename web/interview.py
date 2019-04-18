@@ -5,7 +5,7 @@ from ..hammurabi.us.fed.tax.indiv import withholding as withholding
 
 # print(withholding.__file__)
 
-print(dir())
+# print(dir())
 app = Flask(__name__)
 
 # set FLASK_APP=interview.py
@@ -13,7 +13,7 @@ app = Flask(__name__)
 def investigate_goal():
     # return render_template('main_interview.html')
     # return Investigate([(form_w4_complete, "Hub", "Wife")])
-    return interview_investigate([(form_w4_complete, "Hub", "Wife")])
+    return interview_investigate([(withholding.form_w4_complete, "Hub", "Wife")])
    
 
 @app.route('/', methods=['POST'])
