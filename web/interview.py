@@ -17,10 +17,10 @@ def investigate_goal():
    
 
 @app.route('/', methods=['POST'])
-def my_form_post():
-    text = request.form['text']
-    processed_text = text.upper()
-    return processed_text
+def call_on_form_post():
+    answer = request.form['answer']
+    # print(answer)
+    return value
 
 
 def web_apply_rules(goals: list, fs=[]):
@@ -62,7 +62,7 @@ def collect_input(attr):
     question = attr[4]
 
     if(attr[0] == "bool"):
-        return render_template('main_interview.html', type=type, question=question)
+        return render_template('main_interview.html', type=type, question=question,)
 
     #for debugging
     return jsonify(attr)
