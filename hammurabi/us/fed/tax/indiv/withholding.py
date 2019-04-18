@@ -1,7 +1,7 @@
 import hammurabi.hammurabi.shared.fam as fam
 import hammurabi.hammurabi.us.fed.tax.indiv.shared as tax
 
-print(__package__)
+
 from akkadian import *
 
 
