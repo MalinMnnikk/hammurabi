@@ -20,7 +20,7 @@ def investigate_goal():
 def call_on_form_post():
     answer = request.form['answer']
     # print(answer)
-    return value
+    return answer
 
 
 def web_apply_rules(goals: list, fs=[]):
