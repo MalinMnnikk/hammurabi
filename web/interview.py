@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from akkadian.session import *
+from akkadian import *
 from hammurabi.us.fed.tax.indiv.withholding import *
 
 
@@ -9,8 +9,8 @@ app = Flask(__name__)
 @app.route("/")
 def investigate_goal():
     # return render_template('main_interview.html')
-    return Investigate([(form_w4_complete, "Hub", "Wife")])
-    # return interview_investigate([(form_w4_complete, "Hub", "Wife")])
+    return Investigate([(form_w4_complete, "Hub")])
+    # return interview_investigate([(form_w4_complete, "Hub")])
    
 
 @app.route('/', methods=['POST'])
