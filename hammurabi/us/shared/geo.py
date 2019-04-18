@@ -1,14 +1,12 @@
 from akkadian import *
-import hammurabi.shared.geo as geo
 
 
 def is_us_or_us_territory(juris):
-    return Or(juris == geo.united_states,
+    return Or(juris == "United States",
               is_us_territory(juris))
 
 
 # STATES
-
 
 alabama = "Alabama"
 alaska = "Alaska"

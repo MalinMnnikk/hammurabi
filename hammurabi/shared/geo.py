@@ -3,234 +3,211 @@ from akkadian import *
 
 # A person's country of residence
 def country_of_residence(p):
-    return In("str", "shared.country_of_residence", p, None,
-              "What country does {0} live in?", options=list_of_countries)
+    return In("str", "shared.country_of_residence", p, None, "What country does {0} live in?")
 
 # The country an entity is located in
 def country_location(e):
-    return In("str", "shared.country_location", e, None,
-              "What country is {0} located in?", options=list_of_countries)
+    return In("str", "shared.country_location", e, None, "What country is {0} located in?")
 
 
 # Countries
 
 
-afghanistan = "Afghanistan"
-albania = "Albania"
-algeria = "Algeria"
-andorra = "Andorra"
-angola = "Angola"
-antigua = "Antigua & Deps"
-argentina = "Argentina"
-armenia = "Armenia"
-australia = "Australia"
-austria = "Austria"
-azerbaijan = "Azerbaijan"
-bahamas = "Bahamas"
-bahrain = "Bahrain"
-bangladesh = "Bangladesh"
-barbados = "Barbados"
-belarus = "Belarus"
-belgium = "Belgium"
-belize = "Belize"
-benin = "Benin"
-bhutan = "Bhutan"
-bolivia = "Bolivia"
-bosnia_herzegovina = "Bosnia Herzegovina"
-botswana = "Botswana"
-brazil = "Brazil"
-brunei = "Brunei"
-bulgaria = "Bulgaria"
-burkina = "Burkina"
-burundi = "Burundi"
-cambodia = "Cambodia"
-cameroon = "Cameroon"
-canada = "Canada"
-cape_verde = "Cape Verde"
-central_african_rep = "Central African Republic"
-chad = "Chad"
-chile = "Chile"
-china = "China"
-colombia = "Colombia"
-comoros = "Comoros"
-congo = "Congo"
-dem_rep_of_congo = "Democratic Republic of Congo"
-costa_rica = "Costa Rica"
-croatia = "Croatia"
-cuba = "Cuba"
-cyprus = "Cyprus"
-czech_republic = "Czech Republic"
-denmark = "Denmark"
-djibouti = "Djibouti"
-dominica = "Dominica"
-dominican_republic = "Dominican Republic"
-east_timor = "East Timor"
-ecuador = "Ecuador"
-egypt = "Egypt"
-el_salvador = "El Salvador"
-equatorial_guinea = "Equatorial Guinea"
-eritrea = "Eritrea"
-estonia = "Estonia"
-ethiopia = "Ethiopia"
-fiji = "Fiji"
-finland = "Finland"
-france = "France"
-gabon = "Gabon"
-gambia = "Gambia"
-georgia = "Georgia"
-germany = "Germany"
-ghana = "Ghana"
-greece = "Greece"
-grenada = "Grenada"
-guatemala = "Guatemala"
-guinea = "Guinea"
-guinea_bissau = "Guinea-Bissau"
-guyana = "Guyana"
-haiti = "Haiti"
-honduras = "Honduras"
-hungary = "Hungary"
-iceland = "Iceland"
-india = "India"
-indonesia = "Indonesia"
-iran = "Iran"
-iraq = "Iraq"
-republic_of_ireland = "Republic of Ireland"
-israel = "Israel"
-italy = "Italy"
-ivory_coast = "Ivory Coast"
-jamaica = "Jamaica"
-japan = "Japan"
-jordan = "Jordan"
-kazakhstan = "Kazakhstan"
-kenya = "Kenya"
-kiribati = "Kiribati"
-north_korea = "North Korea"
-south_korea = "South Korea"
-kosovo = "Kosovo"
-kuwait = "Kuwait"
-kyrgyzstan = "Kyrgyzstan"
-laos = "Laos"
-latvia = "Latvia"
-lebanon = "Lebanon"
-lesotho = "Lesotho"
-liberia = "Liberia"
-libya = "Libya"
-liechtenstein = "Liechtenstein"
-lithuania = "Lithuania"
-luxembourg = "Luxembourg"
-macedonia = "Republic of Northern Macedonia"
-madagascar = "Madagascar"
-malawi = "Malawi"
-malaysia = "Malaysia"
-maldives = "Maldives"
-mali = "Mali"
-malta = "Malta"
-marshall_islands = "Marshall Islands"
-mauritania = "Mauritania"
-mauritius = "Mauritius"
-mexico = "Mexico"
-micronesia = "Micronesia"
-moldova = "Moldova"
-monaco = "Monaco"
-mongolia = "Mongolia"
-montenegro = "Montenegro"
-morocco = "Morocco"
-mozambique = "Mozambique"
-myanmar = "Myanmar"
-namibia = "Namibia"
-nauru = "Nauru"
-nepal = "Nepal"
-netherlands = "Netherlands"
-new_zealand = "New Zealand"
-nicaragua = "Nicaragua"
-niger = "Niger"
-nigeria = "Nigeria"
-norway = "Norway"
-oman = "Oman"
-pakistan = "Pakistan"
-palau = "Palau"
-panama = "Panama"
-papua_new_guinea = "Papua New Guinea"
-paraguay = "Paraguay"
-peru = "Peru"
-philippines = "Philippines"
-poland = "Poland"
-portugal = "Portugal"
-qatar = "Qatar"
-romania = "Romania"
-russian_federation = "Russian Federation"
-rwanda = "Rwanda"
-st_kitts_and_nevis = "St Kitts and Nevis"
-st_lucia = "St Lucia"
-st_vincent_and_grenadines = "Saint Vincent and the Grenadines"
-samoa = "Samoa"
-san_marino = "San Marino"
-sao_tome_and_principe = "Sao Tome and Principe"
-saudi_arabia = "Saudi Arabia"
-senegal = "Senegal"
-serbia = "Serbia"
-seychelles = "Seychelles"
-sierra_leone = "Sierra Leone"
-singapore = "Singapore"
-slovakia = "Slovakia"
-slovenia = "Slovenia"
-solomon_islands = "Solomon Islands"
-somalia = "Somalia"
-south_africa = "South Africa"
-south_sudan = "South Sudan"
-spain = "Spain"
-sri_lanka = "Sri Lanka"
-sudan = "Sudan"
-suriname = "Suriname"
-swaziland = "Swaziland"
-sweden = "Sweden"
-switzerland = "Switzerland"
-syria = "Syria"
-taiwan = "Taiwan"
-tajikistan = "Tajikistan"
-tanzania = "Tanzania"
-thailand = "Thailand"
-togo = "Togo"
-tonga = "Tonga"
-trinidad_and_tobago = "Trinidad and Tobago"
-tunisia = "Tunisia"
-turkey = "Turkey"
-turkmenistan = "Turkmenistan"
-tuvalu = "Tuvalu"
-uganda = "Uganda"
-ukraine = "Ukraine"
-united_arab_emirates = "United Arab Emirates"
-united_kingdom = "United Kingdom"
-united_states = "United States"
-uruguay = "Uruguay"
-uzbekistan = "Uzbekistan"
-vanuatu = "Vanuatu"
-vatican_city = "Vatican City"
-venezuela = "Venezuela"
-vietnam = "Vietnam"
-yemen = "Yemen"
-zambia = "Zambia"
-zimbabwe = "Zimbabwe"
+# Afghanistan
+# Albania
+# Algeria
+# Andorra
+# Angola
+# # Antigua & Deps
+# Argentina
+# Armenia
+# Australia
+# Austria
+# Azerbaijan
+# Bahamas
+# Bahrain
+# Bangladesh
+# Barbados
+# Belarus
+# Belgium
+# Belize
+# Benin
+# Bhutan
+# Bolivia
+# Bosnia Herzegovina
+# Botswana
+# Brazil
+# Brunei
+# Bulgaria
+# Burkina
+# Burundi
+# Cambodia
+# Cameroon
+# Canada
+# Cape Verde
+# Central African Rep
+# Chad
+# Chile
+# China
+# Colombia
+# Comoros
+# Congo
+# # Congo {Democratic Rep}
+# Costa Rica
+# Croatia
+# Cuba
+# Cyprus
+# Czech Republic
+# Denmark
+# Djibouti
+# Dominica
+# Dominican Republic
+# East Timor
+# Ecuador
+# Egypt
+# El Salvador
+# Equatorial Guinea
+# Eritrea
+# Estonia
+# Ethiopia
+# Fiji
+# Finland
+# France
+# Gabon
+# Gambia
+# Georgia
+# Germany
+# Ghana
+# Greece
+# Grenada
+# Guatemala
+# Guinea
+# Guinea-Bissau
+# Guyana
+# Haiti
+# Honduras
+# Hungary
+# Iceland
+# India
+# Indonesia
+# Iran
+# Iraq
+# # Ireland {Republic}
+# Israel
+# Italy
+# Ivory Coast
+# Jamaica
+# Japan
+# Jordan
+# Kazakhstan
+# Kenya
+# Kiribati
+# Korea North
+# Korea South
+# Kosovo
+# Kuwait
+# Kyrgyzstan
+# Laos
+# Latvia
+# Lebanon
+# Lesotho
+# Liberia
+# Libya
+# Liechtenstein
+# Lithuania
+# Luxembourg
+# Macedonia
+# Madagascar
+# Malawi
+# Malaysia
+# Maldives
+# Mali
+# Malta
+# Marshall Islands
+# Mauritania
+# Mauritius
+# Mexico
+# Micronesia
+# Moldova
+# Monaco
+# Mongolia
+# Montenegro
+# Morocco
+# Mozambique
+# # Myanmar, {Burma}
+# Namibia
+# Nauru
+# Nepal
+# Netherlands
+# New Zealand
+# Nicaragua
+# Niger
+# Nigeria
+# Norway
+# Oman
+# Pakistan
+# Palau
+# Panama
+# Papua New Guinea
+# Paraguay
+# Peru
+# Philippines
+# Poland
+# Portugal
+# Qatar
+# Romania
+# Russian Federation
+# Rwanda
+# St Kitts & Nevis
+# St Lucia
+# Saint Vincent & the Grenadines
+# Samoa
+# San Marino
+# Sao Tome & Principe
+# Saudi Arabia
+# Senegal
+# Serbia
+# Seychelles
+# Sierra Leone
+# Singapore
+# Slovakia
+# Slovenia
+# Solomon Islands
+# Somalia
+# South Africa
+# South Sudan
+# Spain
+# Sri Lanka
+# Sudan
+# Suriname
+# Swaziland
+# Sweden
+# Switzerland
+# Syria
+# Taiwan
+# Tajikistan
+# Tanzania
+# Thailand
+# Togo
+# Tonga
+# Trinidad & Tobago
+# Tunisia
+# Turkey
+# Turkmenistan
+# Tuvalu
+# Uganda
+# Ukraine
+# United Arab Emirates
+# United Kingdom
+# United States
+# Uruguay
+# Uzbekistan
+# Vanuatu
+# Vatican City
+# Venezuela
+# Vietnam
+# Yemen
+# Zambia
+# Zimbabwe
 
-list_of_countries = [afghanistan, albania, algeria, andorra, angola, antigua, argentina, armenia, australia, austria,
-                     azerbaijan, bahamas, bahrain, bangladesh, barbados, belarus, belgium, belize, benin, bhutan,
-                     bolivia, bosnia_herzegovina, botswana, brazil, brunei, bulgaria, burkina, burundi, cambodia,
-                     cameroon, canada, cape_verde, central_african_rep, chad, chile, china, colombia, comoros,
-                     congo, dem_rep_of_congo, costa_rica, croatia, cuba, cyprus, czech_republic, denmark, djibouti,
-                     dominica, dominican_republic, east_timor, ecuador, egypt, el_salvador, equatorial_guinea, eritrea,
-                     estonia, ethiopia, fiji, finland, france, gabon, gambia, georgia, germany, ghana, greece,
-                     guatemala, guinea, guinea_bissau, guyana, haiti, honduras, hungary, iceland, india, indonesia,
-                     iran, iraq, republic_of_ireland, israel, italy, ivory_coast, jamaica, japan, jordan, kazakhstan,
-                     kenya, kiribati, north_korea, south_korea, kosovo, kuwait, kyrgyzstan, laos, latvia, lebanon,
-                     lesotho, liberia, libya, liechtenstein, lithuania, luxembourg, macedonia, madagascar, malawi,
-                     malaysia, maldives, mali, malta, marshall_islands, mauritania, mauritius, mexico, micronesia,
-                     moldova, monaco, mongolia, montenegro, morocco, mozambique, myanmar, namibia, nauru, nepal,
-                     netherlands, new_zealand, nicaragua, niger, nigeria, norway, oman, pakistan, palau, panama,
-                     papua_new_guinea, paraguay, peru, philippines, poland, portugal, qatar, romania,
-                     russian_federation, rwanda, st_kitts_and_nevis, st_lucia, st_vincent_and_grenadines, samoa,
-                     san_marino, sao_tome_and_principe, saudi_arabia, senegal, serbia, seychelles, sierra_leone,
-                     singapore, slovakia, slovenia, solomon_islands, somalia, south_africa, south_sudan, spain,
-                     sri_lanka, sudan, suriname, swaziland, sweden, switzerland, syria, taiwan, tajikistan, tanzania,
-                     thailand, togo, tonga, trinidad_and_tobago, tunisia, turkey, turkmenistan, tuvalu, uganda, ukraine,
-                     united_arab_emirates, united_kingdom, united_states, uruguay, uzbekistan, vanuatu, vatican_city,
-                     venezuela, vietnam, yemen, zambia, zimbabwe]
+list_of_countries = []
