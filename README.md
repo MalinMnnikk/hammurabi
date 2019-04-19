@@ -4,7 +4,7 @@
 
 ## Motivation
 
-There are **millions of pages of law** - constitutions, statutes, regulations, case law, and interpretive decisions - with which citizens are expected to comply. This mass of material is logically complicated, difficult to contextualize, and based on an inaccessible vocabulary. Aside from the ethical issues caused by this complexity, it is grossly inefficient as an information system. The capital required for someone to understand a legal right or obligation is a wasted resource that creates drag on individual, corporate, and social progress.
+There are **millions of pages of law** - constitutions, statutes, regulations, case law, and interpretive decisions - with which citizens are expected to comply. This mass of material is logically complicated, difficult to contextualize, and based on an inaccessible vocabulary. Aside from the ethical issues caused by this complexity, it is inefficient as an information system.
 
 Though not often thought of this way, **law is inherently computational**. It is a set of algorithms that prescribe how various computations are to be carried out. What is my standard (tax) deduction? Am I eligible for family and medical leave? On what day did I become liable for unemployment taxes? Determinations such as these are like mathematical functions: given various inputs, they produce corresponding outputs.  
 
