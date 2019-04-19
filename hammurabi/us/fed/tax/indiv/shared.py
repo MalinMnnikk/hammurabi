@@ -1,4 +1,4 @@
-import hammurabi.shared.fam as fam
+import hammurabi.hammurabi.shared.fam as fam
 
 from akkadian import *
 

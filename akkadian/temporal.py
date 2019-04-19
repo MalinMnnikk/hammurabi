@@ -12,7 +12,7 @@ from akkadian.Value import *
 
 # Time series NOT
 # Output: TimeSeries
-def Not(ts):
+def Not(ts: TimeSeries):
     return TimeSeries(internal_ts_map_unary_fcn(internal_not, try_converting_to_ts(ts).dict))
 
 
@@ -462,7 +462,7 @@ def internal_math_exp(a: Value):
 # Time series version of math.log(x[, base])
 # Output: TimeSeries
 def Log(x, base=math.e):
-    return process_binary_ts(_log_values, x, base)
+    return process_binary_ts(_log_values, x, y)
 
 
 # Internal, static version of the Log function
@@ -491,13 +491,10 @@ E = math.e
 
 
 # Value of a time series on a given date
-# Output: TimeSeries
+# The implementation uses the "traces" Python package
 # TODO: Handle uncertainty
 def AsOf(ts, dt):
-    return None
-    # return process_binary_ts(f, ts, dt)
-
-# internal_asof(dt: int, ts: dict)
+    return ts[dt]
 
 
 # TIME SERIES COMPONENTS
@@ -507,8 +504,6 @@ def AsOf(ts, dt):
 #     return list(map(lambda x: x.date().isoformat(),
 #                     date_range(start=start, end=end, periods=periods, freq=freq).to_pydatetime()))
 
-
-# MISCELLANEOUS
 
 # TODO...
 

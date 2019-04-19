@@ -97,16 +97,16 @@ list_of_anonymization_types = ["Anonymized", "Pseudonymized", "Neither"]
 
 
 def subject(data):
-    return ToScalar(In("str", "shared.dataprivacy.data_subject", data, None, "Who is the data subject?"))
+    return In("str", "shared.dataprivacy.data_subject", data, None, "Who is the data subject?")
 
 
 def controller(data):
-    return ToScalar(In("str", "shared.dataprivacy.data_controller", data, None, "Who is the data controller?"))
+    return In("str", "shared.dataprivacy.data_controller", data, None, "Who is the data controller?")
 
 
 def processor(data):
-    return ToScalar(In("str", "shared.dataprivacy.data_processor", data, None, "Who is the data processor?"))
+    return In("str", "shared.dataprivacy.data_processor", data, None, "Who is the data processor?")
 
 def intended_activities(data):
     return In("list", "shared.dataprivacy.intended_activities", data, None,
-              "What does " + controller(data) + " intend to do with the data?")
+              "What does the data controller intend to do with the data?")    # "data controller"?
