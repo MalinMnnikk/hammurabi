@@ -184,7 +184,7 @@ def ded_adj_adtl_inc_line_10(p):
     return Max([ded_adj_adtl_inc_line_8(p) + ded_adj_adtl_inc_line_9(p), 0])
 
 
-###############Two Earners/Multiple Jobs Wksht###############
+# Two Earners/Multiple Jobs Worksheet (TEMJ)
 
 
 # Note: Use this worksheet only if the instructions under line H from the Personal Allowances Worksheet direct you here.
@@ -226,6 +226,7 @@ def temj_wksht_line_1(p):
 # Find the number in Table 1 below that applies to the LOWEST paying job and enter it here. However, if you’re
 # married filing jointly and wages from the highest paying job are $75,000 or less and the combined wages for
 # you and your spouse are $107,000 or less, don’t enter more than “3”
+# TODO: Check this. I think this logic got butchered during my refactoring (MP)
 def temj_wksht_line_2(p):
               # Case 1
     return If(And(tax.mfj(p),
@@ -384,7 +385,8 @@ def is_claiming_self(p):
 
 
 def employment_status(p):
-    return In("str", "employment_status", p, None, "What is {0}'s employment status?")
+    return In("str", "employment_status", p, None, "What is {0}'s employment status?",
+              options= ["Employed", "Not employed"])
 
 
 def wages_from_second_job(p):
@@ -402,33 +404,37 @@ def count_of_jobs(p):
 
 def other_credits_pub505(p):
     return In("num", "other_credits_pub505", p, None,
-              "How many other credits does {0} have from Worksheet 1-6 of Pub. 505? (Enter 0 if none.)")
+              question="How many other credits does {0} have from Worksheet 1-6 of Pub. 505?",
+              help="Enter 0 if none.")
 
 
 # temporal?
 def itemized_deductions_2019(p):
     return In("num", "itemized_deductions_2019", p, None,
-              "Please enter the an estimate of {0}'s 2019 itemized deductions. "
-              + "These include qualifying home mortgage interest, "
-              + "charitable contributions, state and local taxes (up to $10,000), and medical expenses in excess of 10% of "
-              + "your income. See Pub. 505 for details")
+              question="Please enter the an estimate of {0}'s 2019 itemized deductions. ",
+              help="These include qualifying home mortgage interest, "
+              + "charitable contributions, state and local taxes (up to $10,000), and medical expenses in excess of "
+              + "10% of your income. See Pub. 505 for details")
 
 
 def estimate_2019_adj_to_inc_qual_bus_inc_ded_addtl_std_ded(p):
-    return In("num", "itemized_deductions_2019", p, None, "Enter an estimate of {0}'s 2019 adjustments to income, "
-              + "qualified business income deduction, and any additional standard deduction for age or blindness "
-              + "(see Pub. 505 for information about these items) . . ")
+    return In("num", "itemized_deductions_2019", p, None,
+              question="Enter an estimate of {0}'s 2019 adjustments to income, "
+              + "qualified business income deduction, and any additional standard deduction for age or blindness.",
+              help="See Pub. 505 for more information about these items.")
 
 
 def estimate_2019_nonwage_inc_not_subj_to_withholding(p):
     return In("num", "itemized_deductions_2019", p, None,
-              "Enter an estimate of {0}'s 2019 nonwage income not subject to withholding (such as dividends or interest)")
+              question="Enter an estimate of {0}'s 2019 nonwage income not subject to withholding.",
+              help="Dividends and interest are examples of such income.")
 
 
 def highest_earning_job_wages(p):
     return In("num", "highest_earning_job_total_wages", p, None, "Enter the wages from {0}'s highest earning job.")
 
 
+# TODO: Ask about each person separately
 def couple_both_work(p, s):
     return In("bool", "couple_both_work", p, s, "Do {0} and {1} both work?")
 
@@ -436,20 +442,20 @@ def couple_both_work(p, s):
 # TODO: This should be calculated from some lower-level facts
 def pay_periods_remaining_in_year(p):
     return In("num", "pay_periods_remaining", p, None,
-              "Enter the number of pay periods remaining in the year for {0}, " +
-              "For example, divide by 18 if you’re paid every 2 weeks and you complete this form on a date in late April when " +
-              "there are 18 pay periods remaining in the year")
+              question="Enter the number of pay periods remaining in the year for {0}.",
+              help="For example, divide by 18 if you’re paid every 2 weeks and it is a date " +
+              "in late April when there are 18 pay periods remaining in the year")
 
 
 def total_income(p):
-    return In("num", "total_income", p, None, "Enter the total expected annual income for {0}")
+    return In("num", "total_income", p, None, "What is {0}'s total annual income?")
 
 
 def num_ctc_children(p):
     return In("num", "number_children_pub_972", p, None,
-              "Enter the number of eligible children from Publication 972, Child Tax Credit for {0}")
+              "Enter the number of eligible children from Publication 972, Child Tax Credit for {0}.")
 
 
 def num_ctc_dependents(p):
     return In("num", "num_dep_pub_972", p, None,
-              "Enter the number of eligible dependents from Publication 972, Child Tax Credit for {0}")
+              "Enter the number of eligible dependents from Publication 972, Child Tax Credit for {0}.")

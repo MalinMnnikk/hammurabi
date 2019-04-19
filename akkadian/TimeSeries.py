@@ -84,7 +84,7 @@ class TimeSeries:
         return process_binary_ts(internal_ge, self, o)
 
 
-# Get the value of a time series on a given day
+# Get the value of an internal time series on a given day
 # Output: Value
 def internal_asof(dt: int, ts: dict):
     last = 0
@@ -96,7 +96,7 @@ def internal_asof(dt: int, ts: dict):
     return ts[list(ts)[-1]]
 
 
-# Merge two time series together
+# Merge two internal time series together
 # Output: dictionary
 def internal_ts_thread(ts1: dict, ts2: dict):
     new_keys = list(set(list(ts1.keys()) + list(ts2.keys())))
@@ -179,6 +179,47 @@ def try_converting_to_ts(a):
         return TimeSeries(Value(a))
 
 
+# LISTS OF TIME SERIES AND TIME SERIES OF LISTS
+
+# When a list containing a TimeSeries is encountered, it has to be converted into a TimeSeries of lists.
+# In a TimeSeries, every value in a date-value pair is a Value object.
+# For Value objects that contain lists, each item in the list can also be a Value object.
+# This is necessary because lists can contain Nulls and Stubs
+# The functions below handle these transformations and bookkeeping
+
+
+# Transform a list of TimeSeries into a TimeSeries of lists
+# Output: TimeSeries
+def normalize_list_of_ts(a):
+    if isinstance(a, list) and list_contains_ts_or_val(a):
+        # Convert list of TimeSeries to a TimeSeries of lists
+        dicts = [try_converting_to_ts(x).dict for x in a]
+        return TimeSeries(internal_ts_thread_multi(dicts))
+    else:
+        return try_converting_to_ts(a)
+
+
+# Indicates whether a list contains a TimeSeries object
+# Output: Boolean
+def list_contains_ts_or_val(a: list):
+    for x in a:
+        if isinstance(x, TimeSeries) or isinstance(x, Value):
+            return True
+    return False
+
+
+# Merge an arbitrary number of internal time series together
+def internal_ts_thread_multi(dicts: list):
+    keys = get_unique_keys(dicts)
+    return {y: Value([internal_asof(y, x) for x in dicts]) for y in keys}
+
+
+# Given a list of dictionaries, return a list of their unique keys
+# Output: list of integers
+def get_unique_keys(dicts: list):
+    return sorted(list(set([val for sublist in [list(x.keys()) for x in dicts] for val in sublist])))
+
+
 # INSTANTIATE A TIME SERIES
 
 
@@ -186,7 +227,17 @@ def try_converting_to_ts(a):
 # Converts string dates to ordinal dates, and scalars to Value objects
 # Output: TimeSeries
 def TS(dct: dict):
-    return TimeSeries(internal_ts_trim({str_date_to_ordinal(x[0]): try_converting_to_val(x[1]) for x in dct.items()}))
+    return TimeSeries(internal_ts_trim(
+        {str_date_to_ordinal(x[0]): try_converting_to_val(x[1]) for x in dct.items()}
+    ))
+
+
+# OTHER CONVERSIONS
+
+
+# Force a TimeSeries to be converted to a scalar by taking the value of the series at t=1
+def ToScalar(ts):
+    return try_converting_to_ts(ts).dict[1].value
 
 
 # DISPLAYING TIME SERIES
@@ -196,7 +247,11 @@ def TS(dct: dict):
 # Output: string
 def Pretty(ts: TimeSeries):
     if len(ts.dict) == 1:
-        return list(ts.dict.values())[0].pretty()
+        result = list(ts.dict.values())[0]
+        if isinstance(result.value, list):
+            return pretty_list(result)
+        else:
+            return list(ts.dict.values())[0].pretty()
     else:
         s = '<TimeSeries>\n'
         for k, v in ts.dict.items():
