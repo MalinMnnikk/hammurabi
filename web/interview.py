@@ -11,7 +11,9 @@ app = Flask(__name__)
 app.secret_key = '5555bf3986fa767556a744c5123afbaf8807a012b0fa45260a6fd18c919d648e'
 
 
-goal = withholding.form_w4_complete
+goal = [(withholding.form_w4_complete, "Hub")]
+#testing
+# goal = [(withholding.combined_couple_wages, "hub", "sps")]
 
 # set FLASK_APP=interview.py
 @app.route("/")
@@ -19,26 +21,36 @@ def investigate_goal():
     web_session['factSet'] = []
     # return render_template('main_interview.html')
     # return Investigate([(form_w4_complete, "Hub", "Wife")])
-    return web_apply_rules([(goal, "Hub", "Wife")])
+    return web_apply_rules(goal)
    
 
-@app.route('/', methods=['POST'])
+@app.route("/", methods=['POST'])
 def call_on_form_post():
+    #get answer from user/form
     answer = request.form['answer']
-    
-    # print(answer)
-    print(web_session.get('queued_attr'))
-    #add user input and attribute to fact set
+
+    #add user input and attribute to session
     fs = web_session['factSet']
+    
     attr = web_session['queued_attr']
     
-    fs.append(Fact(attr[1], attr[2], attr[3], convert_input(attr[0], answer)))
-   
-    print("Fact Set:")
-    for f in fs:
-        print(f)
-    web_apply_rules(goal, fs)
-    return answer
+    #fs is now a list of dicts with each dict representing a fact object that will be converted
+    fs.append(Fact(attr[1], attr[2], attr[3], convert_input(attr[0], answer)).__dict__)
+
+    #clear previous session object to accept new list
+    web_session.pop('factSet', None)
+    
+    #store facts as dict in factSet sesion variable (list)
+    web_session['factSet'] = fs
+    print('web session = ')
+    print(web_session['factSet'])
+
+    #convert to dict back to facts to call apply_rules
+    convertedFactSet = dict_to_facts(web_session['factSet'])
+
+    print("converted fact set")
+    print(convertedFactSet)
+    return web_apply_rules(goal, convertedFactSet)
 
 
 def web_apply_rules(goals: list, fs=[]):
@@ -51,6 +63,10 @@ def web_apply_rules(goals: list, fs=[]):
     # If all of the goals have been determined, present the results
     if results["complete"]:
         return results["msg"]  # TODO
+
+    print("Fact Set in web_apply_rules:")
+    for f in fs:
+        print(f)
 
     # Otherwise, ask the next question...
     else:
@@ -70,6 +86,7 @@ def web_apply_rules(goals: list, fs=[]):
 def collect_input(attr):
     
     #store attribute in session so we know which question was being answered by the user
+    web_session.pop("queued_attr", None)
     web_session["queued_attr"] = attr
 
     type = attr[0]
@@ -78,8 +95,23 @@ def collect_input(attr):
     obj = attr[3]
     question = attr[4]
 
-    if(attr[0] == "bool"):
+    if(type == "bool"):
+        return render_template('main_interview.html', type=type, question=question)
+    if(type == "num"):
+        return render_template('main_interview.html', type=type, question=question)
+    if(type == "str"):
         return render_template('main_interview.html', type=type, question=question)
 
     #for debugging
     return jsonify(attr)
+
+
+def dict_to_facts(sessionObject):
+    fs = []
+    print("session object = ")
+    print(sessionObject)
+    for f in sessionObject:
+        print("converting this")
+        print(f)
+        fs.append(Fact(f['name'], f['subject'], f['object'], f['value']))
+    return fs
