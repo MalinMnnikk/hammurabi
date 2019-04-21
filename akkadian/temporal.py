@@ -12,7 +12,7 @@ from akkadian.Value import *
 
 # Time series NOT
 # Output: TimeSeries
-def Not(ts: TimeSeries):
+def Not(ts):
     return TimeSeries(internal_ts_map_unary_fcn(internal_not, try_converting_to_ts(ts).dict))
 
 
@@ -462,7 +462,7 @@ def internal_math_exp(a: Value):
 # Time series version of math.log(x[, base])
 # Output: TimeSeries
 def Log(x, base=math.e):
-    return process_binary_ts(_log_values, x, y)
+    return process_binary_ts(_log_values, x, base)
 
 
 # Internal, static version of the Log function
@@ -489,12 +489,23 @@ E = math.e
 
 # EXTRACTING VALUES FROM A TIME SERIES
 
-
 # Value of a time series on a given date
-# The implementation uses the "traces" Python package
-# TODO: Handle uncertainty
-def AsOf(ts, dt):
-    return ts[dt]
+# Output: TimeSeries
+def AsOf(dt, ts):
+    dt_dict = try_converting_to_ts(dt).dict
+    vals = [internal_asof_val(x, try_converting_to_ts(ts).dict) for x in dt_dict.values()]
+    return TimeSeries(internal_ts_trim(internal_compose_ts(dt_dict.keys(), vals)))
+
+
+# Internal version of the AsOf function
+# Output: Value
+def internal_asof_val(dt: Value, ts: dict):
+    if ts[1].is_stub:
+        return ts[1]
+    if dt.is_stub or dt.is_null:
+        return dt
+    else:
+        return internal_asof(str_date_to_ordinal(dt.value), ts)
 
 
 # TIME SERIES COMPONENTS
@@ -504,6 +515,8 @@ def AsOf(ts, dt):
 #     return list(map(lambda x: x.date().isoformat(),
 #                     date_range(start=start, end=end, periods=periods, freq=freq).to_pydatetime()))
 
+
+# MISCELLANEOUS
 
 # TODO...
 
