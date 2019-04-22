@@ -108,7 +108,7 @@ def pa_wksht_line_h(p):
            + Boole(tax.mfj(p)) \
            + Boole(tax.hoh(p)) \
            + Boole(only_job_or_low_wage_second(p)) \
-           + ctc_count(p) \
+           + Boole(ctc_count(p)) \
            + credit_for_other_deps(p) \
            + other_credits_pub505(p)
 
@@ -366,10 +366,10 @@ def joint_income(p, s):
     return total_income(p) + total_income(s)
 
 
+# TODO: Is this correct policywise?
+# wages from person's first job, wages from spouse's job
 def combined_couple_wages(p, s):
-    # wages from person's first job, wages from spouse's job
-    return If(fam.is_single(p), wages_from_second_job(p),
-              wages_from_second_job(p) + annual_wages(s))
+    return wages_from_second_job(p) + annual_wages(s)
 
 
 def has_only_one_job(p):
@@ -381,21 +381,22 @@ def has_only_one_job(p):
 
 
 def is_claiming_self(p):
-    return In("bool", "claim_self", p, None, "Does {0} intend to claim themself?")
+    return In("bool", "claim_self", p, None,
+              question="Does {0} intend to claim a deduction for him/herself?")
 
 
 def employment_status(p):
     return In("str", "employment_status", p, None, "What is {0}'s employment status?",
-              options= ["Employed", "Not employed"])
+              options=["Employed", "Not employed"])
 
 
 def wages_from_second_job(p):
     return In("num", "second_job_wages", p, None,
-              "What was the total sum of wages for {0} from their second job last year?")
+              "What was {0}'s total wages from his/her second job last year?")
 
 
 def annual_wages(p):
-    return In("num", "wages", p, None, "What was the total sum of wages for {0} last year?")
+    return In("num", "wages", p, None, "What was {0}'s total wages last year?")
 
 
 def count_of_jobs(p):
@@ -411,7 +412,7 @@ def other_credits_pub505(p):
 # temporal?
 def itemized_deductions_2019(p):
     return In("num", "itemized_deductions_2019", p, None,
-              question="Please enter the an estimate of {0}'s 2019 itemized deductions. ",
+              question="Please enter an estimate of {0}'s itemized deductions for 2019. ",
               help="These include qualifying home mortgage interest, "
               + "charitable contributions, state and local taxes (up to $10,000), and medical expenses in excess of "
               + "10% of your income. See Pub. 505 for details")
@@ -426,12 +427,13 @@ def estimate_2019_adj_to_inc_qual_bus_inc_ded_addtl_std_ded(p):
 
 def estimate_2019_nonwage_inc_not_subj_to_withholding(p):
     return In("num", "itemized_deductions_2019", p, None,
-              question="Enter an estimate of {0}'s 2019 nonwage income not subject to withholding.",
+              question="Enter an estimate of {0}'s nonwage income not subject to withholding for 2019.",
               help="Dividends and interest are examples of such income.")
 
 
 def highest_earning_job_wages(p):
-    return In("num", "highest_earning_job_total_wages", p, None, "Enter the wages from {0}'s highest earning job.")
+    return In("num", "highest_earning_job_total_wages", p, None,
+              question="How much did {0} make in wages from his/her highest earning job.")
 
 
 # TODO: Ask about each person separately
