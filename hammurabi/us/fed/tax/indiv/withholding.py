@@ -1,5 +1,5 @@
-import hammurabi.hammurabi.shared.fam as fam
-import hammurabi.hammurabi.us.fed.tax.indiv.shared as tax
+import hammurabi.shared.fam as fam
+import hammurabi.us.fed.tax.indiv.shared as tax
 
 from akkadian import *
 
